@@ -812,7 +812,6 @@ private fun NUViAApp(darkTheme: Boolean, viewModel: MainViewModel = viewModel())
     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val rootTopContentInset = statusBarTop + 8.dp
     val subpageTopContentInset = statusBarTop + 52.dp + 16.dp
-    val bottomContentInset = (if (hasPlayingSong) (68.dp + MINI_PLAYER_BOTTOM_BAR_GAP + 56.dp + 16.dp) else (68.dp + 16.dp)) + navBarBottom
     val bottomContentInset = (if (hasPlayingSong) (68.dp + MINI_PLAYER_BOTTOM_BAR_GAP + 56.dp + 16.dp) else (68.dp + 16.dp)) + navBarBottom + 24.dp
 
     val listPadding = remember(hasPlayingSong, rootTopContentInset, subpageTopContentInset, bottomContentInset, isSubpageActive, detail) {
@@ -1575,45 +1574,6 @@ private fun NUViAApp(darkTheme: Boolean, viewModel: MainViewModel = viewModel())
 
         val shouldShowNavigationShell = !onboardingActive && !showNowPlaying && !showLogin
         if (shouldShowNavigationShell) {
-            val shellProgress by animateFloatAsState(
-                targetValue = if (isScrollingDown && player.song != null) 1f else 0f,
-                animationSpec = if (reduceAnimation) {
-                    androidx.compose.animation.core.snap()
-                } else {
-                    spring(
-                        dampingRatio = 0.85f,
-                        stiffness = 350f,
-                    )
-                },
-                label = "navShellProgress",
-            )
-            val density = LocalDensity.current
-            val navBarTravel = with(density) { 110.dp.toPx() }
-            val miniPlayerTravel = with(density) { (68.dp + MINI_PLAYER_BOTTOM_BAR_GAP).toPx() }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.BottomCenter,
-            ) {
-                // 1. Floating Bottom Bar (translates down & fades when compact, remains fixed when player.song == null)
-                FloatingBottomBar(
-                    tabs = tabs,
-                    selectedIndex = selectedTab,
-                    hazeState = hazeState,
-                    ownBackdrop = false,
-                    modifier = Modifier.graphicsLayer {
-                        val progress = if (player.song != null) shellProgress else 0f
-                        translationY = progress * navBarTravel
-                        alpha = (1f - progress * 1.6f).coerceIn(0f, 1f)
-                    },
-                    onTabSelected = { index ->
-                        if (shellProgress > 0.5f) return@FloatingBottomBar
-                        if (index == TAB_SEARCH && selectedTab == TAB_SEARCH && !isSubpageActive && detail == null) {
-                            searchFocusTrigger++
-                            return@FloatingBottomBar
-                        }
             PersistentNavigationShell(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 isScrollingDown = isScrollingDown,
@@ -1632,171 +1592,11 @@ private fun NUViAApp(darkTheme: Boolean, viewModel: MainViewModel = viewModel())
                 onTabSelected = { index ->
                     if (index == TAB_SEARCH && selectedTab == TAB_SEARCH && !isSubpageActive && detail == null) {
                         searchFocusTrigger++
-                    } else if (index == selectedTab && detail == null && !isSubpageActive) {
-                        // Keep current tab active
-                    } else {
-                        if (index != TAB_SEARCH) {
-                            searchFocusTrigger = 0
-                        }
-                        if (index == selectedTab && detail == null && !isSubpageActive) {
-                            return@FloatingBottomBar
-                        }
+                    } else if (index != selectedTab || detail != null || isSubpageActive) {
+                        if (index != TAB_SEARCH) searchFocusTrigger = 0
                         dismissAllSubpages()
                         selectedTab = index
-                    },
-                )
-
-                // 2. MiniPlayer Row (centered, translates down to bottom, flanked by Home & Search on scroll down)
-                player.song?.let { song ->
-                    val navBarsBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = navBarsBottomPadding + 68.dp + MINI_PLAYER_BOTTOM_BAR_GAP)
-                            .graphicsLayer {
-                                translationY = shellProgress * miniPlayerTravel
-                            }
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // Home button (emerges on scroll down with Liquid Glass)
-                        Box(
-                            modifier = Modifier
-                                .layout { measurable, constraints ->
-                                    val w = (48.dp.toPx() * shellProgress).roundToInt()
-                                    val placeable = measurable.measure(
-                                        constraints.copy(
-                                            minWidth = w,
-                                            maxWidth = w,
-                                            minHeight = 48.dp.roundToPx(),
-                                            maxHeight = 48.dp.roundToPx(),
-                                        )
-                                    )
-                                    layout(w, placeable.height) {
-                                        placeable.placeRelative(0, 0)
-                                    }
-                                }
-                                .graphicsLayer {
-                                    alpha = shellProgress
-                                    scaleX = 0.6f + 0.4f * shellProgress
-                                    scaleY = 0.6f + 0.4f * shellProgress
-                                }
-                                .clip(CircleShape)
-                                .nuviaTactilePress()
-                                .nuviaGlass(tier = NUViAGlassTier.Elevated, shape = CircleShape, hazeState = hazeState)
-                                .nuviaSpecularBorder(CircleShape, 0.75.dp)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    enabled = shellProgress > 0.5f,
-                                ) {
-                                    if (selectedTab != TAB_HOME || isSubpageActive || detail != null) {
-                                        dismissAllSubpages()
-                                        selectedTab = TAB_HOME
-                                    }
-                                    scope.launch {
-                                        homeListState.animateScrollToItem(0)
-                                    }
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = if (selectedTab == TAB_HOME && !isSubpageActive && detail == null) NUViAIcons.HomeFilled else NUViAIcons.Home,
-                                contentDescription = "Home",
-                                tint = if (selectedTab == TAB_HOME && !isSubpageActive && detail == null) nuviaColors.primary else nuviaColors.textPrimary,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        }
-
-                        Spacer(
-                            modifier = Modifier.layout { measurable, constraints ->
-                                val w = (8.dp.toPx() * shellProgress).roundToInt()
-                                layout(w, 0) {}
-                            }
-                        )
-
-                        // Centered MiniPlayer
-                        Box(modifier = Modifier.weight(1f)) {
-                            MiniPlayer(
-                                song = song,
-                                isPlaying = player.isPlaying,
-                                isLoading = player.isLoading,
-                                hazeState = hazeState,
-                                ownBackdrop = false,
-                                onPlayPause = {
-                                    controller?.let { if (it.isPlaying) it.pause() else it.play() }
-                                },
-                                onNext = { controller?.seekToNextMediaItem() },
-                                onPrevious = if (player.hasPrevious) { { controller?.seekToPreviousMediaItem() } } else null,
-                                onExpand = {
-                                    activeNowPlayingSong = player.song
-                                    showNowPlaying = true
-                                },
-                                progressProvider = {
-                                    if (player.durationMs > 0) {
-                                        (playbackPositionState.value.toFloat() / player.durationMs).coerceIn(0f, 1f)
-                                    } else 0f
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-
-                        Spacer(
-                            modifier = Modifier.layout { measurable, constraints ->
-                                val w = (8.dp.toPx() * shellProgress).roundToInt()
-                                layout(w, 0) {}
-                            }
-                        )
-
-                        // Search button (emerges on scroll down with Liquid Glass)
-                        Box(
-                            modifier = Modifier
-                                .layout { measurable, constraints ->
-                                    val w = (48.dp.toPx() * shellProgress).roundToInt()
-                                    val placeable = measurable.measure(
-                                        constraints.copy(
-                                            minWidth = w,
-                                            maxWidth = w,
-                                            minHeight = 48.dp.roundToPx(),
-                                            maxHeight = 48.dp.roundToPx(),
-                                        )
-                                    )
-                                    layout(w, placeable.height) {
-                                        placeable.placeRelative(0, 0)
-                                    }
-                                }
-                                .graphicsLayer {
-                                    alpha = shellProgress
-                                    scaleX = 0.6f + 0.4f * shellProgress
-                                    scaleY = 0.6f + 0.4f * shellProgress
-                                }
-                                .clip(CircleShape)
-                                .nuviaTactilePress()
-                                .nuviaGlass(tier = NUViAGlassTier.Elevated, shape = CircleShape, hazeState = hazeState)
-                                .nuviaSpecularBorder(CircleShape, 0.75.dp)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    enabled = shellProgress > 0.5f,
-                                ) {
-                                    if (selectedTab != TAB_SEARCH || isSubpageActive || detail != null) {
-                                        dismissAllSubpages()
-                                        selectedTab = TAB_SEARCH
-                                    }
-                                    searchFocusTrigger++
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = if (selectedTab == TAB_SEARCH && !isSubpageActive && detail == null) NUViAIcons.SearchFilled else NUViAIcons.Search,
-                                contentDescription = "Search",
-                                tint = if (selectedTab == TAB_SEARCH && !isSubpageActive && detail == null) nuviaColors.primary else nuviaColors.textPrimary,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        }
                     }
-                }
-            }
                 },
                 onHomeShortcutClicked = {
                     if (selectedTab != TAB_HOME || isSubpageActive || detail != null) {
@@ -2805,4 +2605,3 @@ private fun PersistentNavigationShell(
         }
     }
 }
-

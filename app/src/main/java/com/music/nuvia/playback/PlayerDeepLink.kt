@@ -27,11 +27,9 @@ object PlayerDeepLink {
     /** Reads an incoming intent, and reports whether it asked for the player. */
     fun consume(intent: Intent?): Boolean {
         if (intent == null) return false
-        val matched = intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false) ||
-            intent.getBooleanExtra(EXTRA_OPEN_PLAYER_ALT, false)
+        val matched = intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
         if (!matched) return false
         intent.removeExtra(EXTRA_OPEN_PLAYER)
-        intent.removeExtra(EXTRA_OPEN_PLAYER_ALT)
         _pending.value = true
         return true
     }

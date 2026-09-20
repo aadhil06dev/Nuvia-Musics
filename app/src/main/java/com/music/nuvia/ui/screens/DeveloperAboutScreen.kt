@@ -288,7 +288,6 @@ fun DeveloperAboutScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 20.dp),
                     .padding(bottom = 20.dp + contentPadding.calculateBottomPadding()),
             ) {
                 LiquidGlassButton(

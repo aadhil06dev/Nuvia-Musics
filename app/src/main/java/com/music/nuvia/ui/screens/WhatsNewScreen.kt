@@ -65,8 +65,6 @@ private val HIGHLIGHTS = listOf(
         icon = Icons.Rounded.ViewAgenda,
         title = "Pinned Cinematic Headers",
         description = "Atmospheric greeting, brand identity, and quick vibe selectors stay pinned above scrollable feeds on Home and Settings.",
-        title = "Natural Fluid Headers",
-        description = "Atmospheric greeting, brand identity, and vibe selector chips integrate seamlessly into your music feed, scrolling naturally with content.",
     ),
     FeatureHighlight(
         icon = Icons.Rounded.Search,
@@ -233,4 +231,3 @@ fun WhatsNewScreen(
         Spacer(Modifier.height(contentPadding.calculateBottomPadding() + 32.dp))
     }
 }
-
