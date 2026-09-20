@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    
+    <!-- Notification mark (monochrome white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 14.5,20.5 C 15.33,20.5 16.0,21.17 16.0,22.0 L 16.0,26.0 C 16.0,26.83 15.33,27.5 14.5,27.5 C 13.67,27.5 13.0,26.83 13.0,26.0 L 13.0,22.0 C 13.0,21.17 13.67,20.5 14.5,20.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 19.5,15.5 C 20.33,15.5 21.0,16.17 21.0,17.0 L 21.0,31.0 C 21.0,31.83 20.33,32.5 19.5,32.5 C 18.67,32.5 18.0,31.83 18.0,31.0 L 18.0,17.0 C 18.0,16.17 18.67,15.5 19.5,15.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 24.0,10.0 C 24.83,10.0 25.5,10.67 25.5,11.5 L 25.5,36.5 C 25.5,37.33 24.83,38.0 24.0,38.0 C 23.17,38.0 22.5,37.33 22.5,36.5 L 22.5,11.5 C 22.5,10.67 23.17,10.0 24.0,10.0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 28.5,17.5 C 29.33,17.5 30.0,18.17 30.0,19.0 L 30.0,31.0 C 30.0,31.83 29.33,32.5 28.5,32.5 C 27.67,32.5 27.0,31.83 27.0,31.0 L 27.0,19.0 C 27.0,18.17 27.67,17.5 28.5,17.5 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 33.5,20.5 C 34.33,20.5 35.0,21.17 35.0,22.0 L 35.0,26.0 C 35.0,26.83 34.33,27.5 33.5,27.5 C 32.67,27.5 32.0,26.83 32.0,26.0 L 32.0,22.0 C 32.0,21.17 32.67,20.5 33.5,20.5 Z" />
+</vector>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 
+      Adaptive Icon Foreground Layer (108dp canvas).
+      Android specifies an inner 66dp safe circle (72dp recommended for main glyph),
+      so adding 20dp inset places the orange logo in the safe zone.
+    -->
+    <item
+        android:drawable="@drawable/ic_nuvia_orange_logo"
+        android:gravity="center"
+        android:top="20dp"
+        android:bottom="20dp"
+        android:left="20dp"
+        android:right="20dp" />
+</layer-list>

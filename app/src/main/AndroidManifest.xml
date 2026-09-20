@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Tells Wi-Fi from mobile data, so the matching quality ceiling applies. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Touch feedback. The system's own haptics switch is honoured on top of
+         this, so granting it doesn't override a user who turned buzzing off. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Saving a track to Music outlives the screen it was asked from. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Reading local audio files across the device -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!--
+      Only for API 28 and below. From 29 the app writes to the shared Music
+      folder through MediaStore, which grants access to the rows it created and
+      needs no permission at all — and this one stops being grantable there.
+    -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!--
+      Package visibility for the Dolby Atmos panel the spatial audio row hands
+      the user to. Without this, API 30+ hides those packages from the launcher
+      lookup and the row would fall back to plain sound settings even on a
+      device that ships the Atmos app.
+    -->
+    <queries>
+        <package android:name="com.dolby.dax2appui" />
+        <package android:name="com.dolby.daxappui" />
+        <package android:name="com.dolby.dolby234" />
+        <package android:name="com.atc.daxappUI" />
+        <intent>
+            <action android:name="android.settings.SOUND_SETTINGS" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".NUViAApplication"
+        android:allowBackup="true"
+        android:usesCleartextTraffic="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:localeConfig="@xml/locales_config"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.NUViA"
+        tools:targetApi="34">
+
+        <!--
+          One UI 7+ only routes an app's ongoing notification to Live
+          Notifications / the Now Bar if the app opts in here. Ignored by every
+          other OEM. Samsung additionally gates the non-media Live Notification
+          extras behind a per-package allowlist; the media card does not need it.
+        -->
+        <meta-data
+            android:name="com.samsung.android.support.ongoing_activity"
+            android:value="true" />
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+        <!--
+          Portrait only. Every screen is laid out for a tall single column —
+          the player's artwork square, the frosted bars, the floating tab bar —
+          and none of it has a landscape design to fall back on.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NUViA">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Android Auto support -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <service
+            android:name=".playback.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+            </intent-filter>
+        </service>
+
+        <!--
+          Downloads. Not exported: it is started by the app and by its own
+          cancel action, and nothing outside has any business queueing work.
+        -->
+        <service
+            android:name=".download.DownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+    </application>
+
+</manifest>
