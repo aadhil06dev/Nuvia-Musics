@@ -1,10 +1,5 @@
 ﻿# NUViA Git Ignore
 
-# BitChord reference - NEVER upload
-BitChord-main/
-nuvia_ref/
-BitChord-main.zip
-
 # Gradle
 .gradle/
 build/
